@@ -13,6 +13,8 @@ Alyson Chen
 
 Teddy Li
 
+Vahe Tascian 
+
 ## Objective
 
 A Data Analysis of Covid19 Air Pollution Implications Through HDFS and Spark
