@@ -1,5 +1,8 @@
 #import data, get rid of #-comments
-df = read.csv("waqi-covid19-airqualitydata-2020.csv", comment.char="#")
+df <- read.csv("C:/Users/manth/Google Drive/MS BUAN/03 Spring session 2020/Unstructured and Distributed Data Modeling MSBX 5420/Group_Project_Unstructured_Distributed_Data/waqi-covid19-airqualitydata-2020.csv", comment.char="#")
+df$Date=as.Date(df$Date)
+str(df)
+df$weekday=weekdays(df$Date)
 
 #load libraries,
 library(psych)
@@ -41,7 +44,7 @@ us_no2_2020$shelter_in_place <- ifelse(us_no2_2020$Date =="2020-03-20" & us_no2_
                                                      ifelse(us_no2_2020$Date=="2020-03-18" & us_no2_2020$City == "San Francisco", 1,
                                                             ifelse(us_no2_2020$Date=="2020-03-23" & us_no2_2020$City == "Seattle", 1,
                                                                    ifelse(us_no2_2020$Date=="2020-04-01" & us_no2_2020$City == "Washington D.C.", 1, 0))))))
-                                                            
+
 #Create longitude column "lon"
 us_no2_2020$lon <- ifelse(us_no2_2020$City=="Chicago", -87.629799,
                           ifelse(us_no2_2020$City=="Los Angeles", -118.243683,
@@ -57,21 +60,46 @@ us_no2_2020$lat <- ifelse(us_no2_2020$City=="Chicago", 41.878113,
                                         ifelse(us_no2_2020$City=="San Francisco", 37.779379,
                                                ifelse(us_no2_2020$City=="Seattle", 47.603363,
                                                       ifelse(us_no2_2020$City=="Washington D.C.", 38.895438, 0))))))
-                          
+
 
 #find Max/Min of "median" variable
 summary(us_no2_2020)
+tail(us_no2_2020)
 
-usa <- ggplot() +
+usa <- ggplot()+
   borders("usa", colour = "gray85", fill = "gray80") +
   theme_map() 
 
 usmap <- usa +
-  geom_point(data = us_no2_2020, aes(x = lon,y = lat, size = median),
-             colour = 'red1', alpha = .5) +
+  geom_point(data = us_no2_2020, 
+             aes(x = lon,y = lat, 
+                 size = median, 
+                 colour=median), alpha = .5) +
   scale_size_continuous(range = c(1, 8), 
                         breaks = c(10, 20, 30, 40)) +
-  labs(size = 'median')
+  labs(size = 'Median NO2 Concentration')+ 
+  theme(legend.position="bottom") +
+  scale_color_gradient(low="yellow", high="red")
+
+
+### Working Plot Animation Script
+
+anim <- usmap + 
+  transition_states(Date,
+                    transition_length = 2,
+                    state_length = 1)
+anim+transition_time(Date) +
+  labs(title = "Date: {frame_time}")
+file_renderer(dir = ".", prefix = "gganim_plot", overwrite = FALSE)
+
+
+#anim + ggtitle('Now showing {closest_state}',subtitle = 'Frame {frame} of {nframes}')
+
+#anim
+
+
+
+#### Pre-existing attempt at Plot Animation
 
 ghost_points_ini <- tibble(
   created_at = as.Date('2019-12-30'),
@@ -95,4 +123,3 @@ usmap <- usa +
 
 ani.options(interval = 0.5)
 gganimate(usmap)
-
